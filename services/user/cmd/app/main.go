@@ -4,7 +4,10 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/guluzadehh/go_eshop/services/user/app"
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
 	"github.com/joho/godotenv"
 )
@@ -25,6 +28,15 @@ func main() {
 	log := setupLogger(config.Env)
 	log.Info("starting user app", slog.String("env", config.Env))
 
+	app := app.New(log, config)
+
+	go app.Start()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+	<-stop
+
+	app.Stop()
 }
 
 func setupLogger(env string) *slog.Logger {
