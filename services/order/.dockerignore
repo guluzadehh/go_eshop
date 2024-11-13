@@ -1,0 +1,33 @@
+# Binaries and test outputs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go dependency directories
+vendor/
+
+# Temporary and editor-specific files
+*.tmp
+*~
+.vscode/
+.history/
+.idea/
+*.swp
+*.swo
+
+# Environment files (keep secrets out of Docker images)
+.env
+
+# Git-related files
+.git
+.gitignore
+
+# Node-related files (if using npm/yarn in the project)
+node_modules/
+
+# Docker build cache or temporary files
+Dockerfile~
