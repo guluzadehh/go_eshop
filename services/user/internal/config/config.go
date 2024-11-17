@@ -54,6 +54,7 @@ type Access struct {
 type Refresh struct {
 	Expire     time.Duration `yaml:"expire" env-default:"168h"`
 	CookieName string        `yaml:"cookie_name" env-default:"jwt_refresh"`
+	Uri        string        `yaml:"uri" env-required:"true"`
 }
 
 func MustLoad() *Config {
