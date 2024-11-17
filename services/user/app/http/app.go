@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
 	authhttp "github.com/guluzadehh/go_eshop/services/user/internal/http/handlers/auth"
+	loggingmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/logging"
+	requestmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/request"
 )
 
 type HTTPApp struct {
@@ -26,6 +28,9 @@ func New(log *slog.Logger, config *config.Config, authService authhttp.AuthServi
 	}
 
 	router := mux.NewRouter()
+	router.Use(requestmdw.AddRequestId)
+	router.Use(loggingmdw.LogRequests(log))
+
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("User service is running"))
