@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
+	authhttp "github.com/guluzadehh/go_eshop/services/user/internal/http/handlers/auth"
 )
 
 type HTTPApp struct {
@@ -16,7 +17,7 @@ type HTTPApp struct {
 	httpServer *http.Server
 }
 
-func New(log *slog.Logger, config *config.Config) *HTTPApp {
+func New(log *slog.Logger, config *config.Config, authService authhttp.AuthService) *HTTPApp {
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%d", config.HTTPServer.Port),
 		ReadTimeout:  config.HTTPServer.Timeout,
@@ -29,6 +30,12 @@ func New(log *slog.Logger, config *config.Config) *HTTPApp {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("User service is running"))
 	})
+
+	api := router.PathPrefix("/api").Subrouter()
+
+	authHandler := authhttp.New(log, authService)
+
+	api.HandleFunc("/login", authHandler.Login)
 
 	server.Handler = router
 
