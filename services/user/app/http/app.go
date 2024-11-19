@@ -38,7 +38,7 @@ func New(log *slog.Logger, config *config.Config, authService authhttp.AuthServi
 
 	api := router.PathPrefix("/api").Subrouter()
 
-	authHandler := authhttp.New(log, authService)
+	authHandler := authhttp.New(log, config, authService)
 
 	api.HandleFunc("/login", authHandler.Login)
 
