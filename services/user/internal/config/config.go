@@ -14,6 +14,7 @@ type Config struct {
 	Env        string     `yaml:"env" env-required:"true"`
 	HTTPServer HTTPServer `yaml:"http_server"`
 	Postgresql Postgresql `yaml:"postgresql"`
+	Migrations Migrations `yaml:"migrations"`
 	JWT        JWT        `yaml:"jwt"`
 }
 
@@ -55,6 +56,11 @@ type Refresh struct {
 	Expire     time.Duration `yaml:"expire" env-default:"168h"`
 	CookieName string        `yaml:"cookie_name" env-default:"jwt_refresh"`
 	Uri        string        `yaml:"uri" env-required:"true"`
+}
+
+type Migrations struct {
+	Path      string `yaml:"path" env-default:"./migrations"`
+	TableName string `yaml:"table_name" env-default:"migrations"`
 }
 
 func MustLoad() *Config {
