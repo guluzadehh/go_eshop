@@ -36,6 +36,10 @@ func New(log *slog.Logger, config *config.Config, userProvider UserProvider) *Au
 	}
 }
 
+func (s *AuthService) SetLog(log *slog.Logger) {
+	s.log = log
+}
+
 func (s *AuthService) Login(ctx context.Context, email string, password string) (string, string, error) {
 	const op = "services.auth.Login"
 
