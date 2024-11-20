@@ -11,6 +11,20 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/services/auth"
 )
 
+type LoginReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginRes struct {
+	api.Response
+	Data *LoginData `json:"data,omitempty"`
+}
+
+type LoginData struct {
+	Token string `json:"access_token"`
+}
+
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	const op = "handlers.auth.Login"
 
