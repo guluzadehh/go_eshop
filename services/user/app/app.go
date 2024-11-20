@@ -22,7 +22,7 @@ func New(log *slog.Logger, config *config.Config) *App {
 		panic(err)
 	}
 
-	authService := auth.New(log, config, pgStorage)
+	authService := auth.New(log, config, pgStorage, pgStorage)
 
 	httpApp := httpapp.New(log, config, authService)
 

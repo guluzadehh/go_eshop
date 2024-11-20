@@ -16,23 +16,30 @@ import (
 
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrEmailExists        = errors.New("email is already taken")
 )
 
 type UserProvider interface {
 	UserByEmail(ctx context.Context, email string) (*models.User, error)
 }
 
+type UserSaver interface {
+	CreateUser(ctx context.Context, email string, password string) (*models.User, error)
+}
+
 type AuthService struct {
 	log          *slog.Logger
 	config       *config.Config
 	userProvider UserProvider
+	userSaver    UserSaver
 }
 
-func New(log *slog.Logger, config *config.Config, userProvider UserProvider) *AuthService {
+func New(log *slog.Logger, config *config.Config, userProvider UserProvider, userSaver UserSaver) *AuthService {
 	return &AuthService{
 		log:          log,
 		config:       config,
 		userProvider: userProvider,
+		userSaver:    userSaver,
 	}
 }
 
@@ -79,4 +86,25 @@ func (s *AuthService) Login(ctx context.Context, email string, password string) 
 	}
 
 	return access, refresh, nil
+}
+
+func (s *AuthService) Signup(ctx context.Context, email string, password string) (*models.User, error) {
+	const op = "services.auth.Signup"
+
+	log := s.log.With(slog.String("op", op))
+
+	user, err := s.userSaver.CreateUser(ctx, email, password)
+	if err != nil {
+		if errors.Is(err, storage.UserExists) {
+			log.Info("email is taken")
+			return nil, ErrEmailExists
+		}
+
+		log.Error("couldn't save the user", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("user has been created")
+
+	return user, nil
 }
