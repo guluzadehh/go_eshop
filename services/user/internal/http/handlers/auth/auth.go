@@ -17,6 +17,7 @@ import (
 
 type AuthService interface {
 	Login(ctx context.Context, email string, password string) (access string, refresh string, err error)
+	SetLog(log *slog.Logger)
 }
 
 type AuthHandler struct {
@@ -36,7 +37,7 @@ func New(log *slog.Logger, config *config.Config, srvc AuthService) *AuthHandler
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	const op = "handlers.auth.Login"
 
-	log := sl.ForHandler(h.Log, op, requestmdw.GetRequestId(r))
+	log := sl.HandlerJob(h.Log, op, requestmdw.GetRequestId(r), h.srvc)
 
 	var req Request
 	if err := render.DecodeJSON(r.Body, &req); err != nil {
