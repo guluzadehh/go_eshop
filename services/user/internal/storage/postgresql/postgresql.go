@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/guluzadehh/go_eshop/services/user/internal/domain/models"
 	"github.com/guluzadehh/go_eshop/services/user/internal/storage"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -55,4 +57,41 @@ func (s *Storage) UserByEmail(ctx context.Context, email string) (*models.User, 
 	}
 
 	return &user, nil
+}
+
+func (s *Storage) CreateUser(ctx context.Context, email string, password string) (*models.User, error) {
+	const op = "storage.postgresql.CreateUser"
+
+	const query = `
+		INSERT INTO users(users.email, users.password)
+		VALUES ($1, $2)
+		RETURNING users.id, users.created_at, users.updated_at, users.is_active
+	`
+
+	stmt, err := s.db.PrepareContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var lastInsertedId int64
+	var createdAt, updatedAt time.Duration
+	var isActive bool
+
+	err = stmt.QueryRowContext(ctx, email, password).Scan(&lastInsertedId, &createdAt, &updatedAt, &isActive)
+	if err != nil {
+		if postgresErr, ok := err.(*pq.Error); !ok && postgresErr.Code.Name() == "unique_violation" {
+			return nil, storage.UserExists
+		}
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return &models.User{
+		Id:        lastInsertedId,
+		Email:     email,
+		Password:  []byte(password),
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+		IsActive:  isActive,
+	}, nil
 }
