@@ -63,9 +63,9 @@ func (s *Storage) CreateUser(ctx context.Context, email string, password string)
 	const op = "storage.postgresql.CreateUser"
 
 	const query = `
-		INSERT INTO users(users.email, users.password)
+		INSERT INTO users(email, password)
 		VALUES ($1, $2)
-		RETURNING users.id, users.created_at, users.updated_at, users.is_active
+		RETURNING id, created_at, updated_at, is_active
 	`
 
 	stmt, err := s.db.PrepareContext(ctx, query)
@@ -74,12 +74,12 @@ func (s *Storage) CreateUser(ctx context.Context, email string, password string)
 	}
 
 	var lastInsertedId int64
-	var createdAt, updatedAt time.Duration
+	var createdAt, updatedAt time.Time
 	var isActive bool
 
 	err = stmt.QueryRowContext(ctx, email, password).Scan(&lastInsertedId, &createdAt, &updatedAt, &isActive)
 	if err != nil {
-		if postgresErr, ok := err.(*pq.Error); !ok && postgresErr.Code.Name() == "unique_violation" {
+		if postgresErr, ok := err.(*pq.Error); ok && postgresErr.Code.Name() == "unique_violation" {
 			return nil, storage.UserExists
 		}
 
