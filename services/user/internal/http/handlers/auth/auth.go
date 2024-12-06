@@ -5,11 +5,13 @@ import (
 	"log/slog"
 
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
+	"github.com/guluzadehh/go_eshop/services/user/internal/domain/models"
 	"github.com/guluzadehh/go_eshop/services/user/internal/http/handlers"
 )
 
 type AuthService interface {
 	Login(ctx context.Context, email string, password string) (access string, refresh string, err error)
+	Signup(ctx context.Context, email string, password string) (*models.User, error)
 	SetLog(log *slog.Logger)
 }
 
