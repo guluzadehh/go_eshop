@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
 	authhttp "github.com/guluzadehh/go_eshop/services/user/internal/http/handlers/auth"
+	authmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/auth"
 	loggingmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/logging"
 	requestmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/request"
 )
@@ -19,7 +20,12 @@ type HTTPApp struct {
 	httpServer *http.Server
 }
 
-func New(log *slog.Logger, config *config.Config, authService authhttp.AuthService) *HTTPApp {
+func New(
+	log *slog.Logger,
+	config *config.Config,
+	authService authhttp.AuthService,
+	authUserProviderService authmdw.UserProviderService,
+) *HTTPApp {
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%d", config.HTTPServer.Port),
 		ReadTimeout:  config.HTTPServer.Timeout,
@@ -42,6 +48,9 @@ func New(log *slog.Logger, config *config.Config, authService authhttp.AuthServi
 
 	api.HandleFunc("/login", authHandler.Login).Methods("POST")
 	api.HandleFunc("/signup", authHandler.Signup).Methods("POST")
+
+	authApi := api.NewRoute().Subrouter()
+	authApi.Use(authmdw.Authorize(log, config, authUserProviderService))
 
 	server.Handler = router
 
