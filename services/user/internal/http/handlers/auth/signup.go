@@ -10,7 +10,7 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/render"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/sl"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/validators"
-	"github.com/guluzadehh/go_eshop/services/user/internal/services/auth"
+	"github.com/guluzadehh/go_eshop/services/user/internal/service"
 	"github.com/guluzadehh/go_eshop/services/user/internal/types"
 )
 
@@ -59,7 +59,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.srvc.Signup(r.Context(), req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, auth.ErrEmailExists) {
+		if errors.Is(err, service.ErrEmailExists) {
 			h.JSON(w, http.StatusConflict, api.ErrD(
 				"user exists",
 				[]api.ErrDetail{

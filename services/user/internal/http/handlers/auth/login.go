@@ -8,7 +8,7 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/api"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/render"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/sl"
-	"github.com/guluzadehh/go_eshop/services/user/internal/services/auth"
+	"github.com/guluzadehh/go_eshop/services/user/internal/service"
 )
 
 type LoginReq struct {
@@ -39,7 +39,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	access, refresh, err := h.srvc.Login(r.Context(), req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, auth.ErrInvalidCredentials) {
+		if errors.Is(err, service.ErrInvalidCredentials) {
 			h.JSON(w, http.StatusUnauthorized, api.Err("invalid credentials"))
 			return
 		}

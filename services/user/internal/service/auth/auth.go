@@ -10,13 +10,9 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/domain/models"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/jwt"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/sl"
+	"github.com/guluzadehh/go_eshop/services/user/internal/service"
 	"github.com/guluzadehh/go_eshop/services/user/internal/storage"
 	"golang.org/x/crypto/bcrypt"
-)
-
-var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrEmailExists        = errors.New("email is already taken")
 )
 
 type UserProvider interface {
@@ -56,7 +52,7 @@ func (s *AuthService) Login(ctx context.Context, email string, password string) 
 	if err != nil {
 		if errors.Is(err, storage.UserNotFound) {
 			log.Warn("user doesn't exist")
-			return "", "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return "", "", fmt.Errorf("%s: %w", op, service.ErrInvalidCredentials)
 		}
 
 		log.Error("failed to get user", sl.Err(err))
@@ -66,7 +62,7 @@ func (s *AuthService) Login(ctx context.Context, email string, password string) 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			log.Warn("invalid credentials", slog.Int64("user_id", user.Id))
-			return "", "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return "", "", fmt.Errorf("%s: %w", op, service.ErrInvalidCredentials)
 		}
 
 		log.Error("failed to compare passwords", sl.Err(err))
@@ -103,7 +99,7 @@ func (s *AuthService) Signup(ctx context.Context, email string, password string)
 	if err != nil {
 		if errors.Is(err, storage.UserExists) {
 			log.Info("email is taken")
-			return nil, ErrEmailExists
+			return nil, service.ErrEmailExists
 		}
 
 		log.Error("couldn't save the user", sl.Err(err))

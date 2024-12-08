@@ -6,7 +6,7 @@ import (
 	httpapp "github.com/guluzadehh/go_eshop/services/user/app/http"
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/sl"
-	"github.com/guluzadehh/go_eshop/services/user/internal/services/auth"
+	"github.com/guluzadehh/go_eshop/services/user/internal/service/auth"
 	"github.com/guluzadehh/go_eshop/services/user/internal/storage/postgresql"
 )
 
