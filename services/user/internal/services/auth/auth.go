@@ -93,7 +93,13 @@ func (s *AuthService) Signup(ctx context.Context, email string, password string)
 
 	log := s.log.With(slog.String("op", op))
 
-	user, err := s.userSaver.CreateUser(ctx, email, password)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		log.Error("failed to hash password", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	user, err := s.userSaver.CreateUser(ctx, email, string(bytes))
 	if err != nil {
 		if errors.Is(err, storage.UserExists) {
 			log.Info("email is taken")
