@@ -40,8 +40,8 @@ func New(log *slog.Logger, config *config.Config, authService authhttp.AuthServi
 
 	authHandler := authhttp.New(log, config, authService)
 
-	api.HandleFunc("/login", authHandler.Login)
-	api.HandleFunc("/signup", authHandler.Signup)
+	api.HandleFunc("/login", authHandler.Login).Methods("POST")
+	api.HandleFunc("/signup", authHandler.Signup).Methods("POST")
 
 	server.Handler = router
 
