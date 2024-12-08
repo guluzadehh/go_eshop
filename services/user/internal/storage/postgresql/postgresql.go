@@ -95,3 +95,25 @@ func (s *Storage) CreateUser(ctx context.Context, email string, password string)
 		IsActive:  isActive,
 	}, nil
 }
+
+func (s *Storage) UserById(ctx context.Context, id int) (*models.User, error) {
+	const op = "storage.postgresql.UserById"
+
+	var user models.User
+
+	const query = `
+		SELECT users.id, users.email, users.password, users.created_at, users.updated_at, users.is_active
+		FROM users
+		WHERE users.id = $1;
+	`
+
+	if err := s.db.QueryRowContext(ctx, query, id).Scan(&user.Id, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.IsActive); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("%s: %w", op, storage.UserNotFound)
+		}
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return &user, nil
+}
