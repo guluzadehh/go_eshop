@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
 	authhttp "github.com/guluzadehh/go_eshop/services/user/internal/http/handlers/auth"
+	profilehttp "github.com/guluzadehh/go_eshop/services/user/internal/http/handlers/profile"
 	authmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/auth"
 	loggingmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/logging"
 	requestmdw "github.com/guluzadehh/go_eshop/services/user/internal/http/middlewares/request"
@@ -25,6 +26,7 @@ func New(
 	config *config.Config,
 	authService authhttp.AuthService,
 	authUserProviderService authmdw.UserProviderService,
+	profileService profilehttp.ProfileService,
 ) *HTTPApp {
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%d", config.HTTPServer.Port),
@@ -45,12 +47,15 @@ func New(
 	api := router.PathPrefix("/api").Subrouter()
 
 	authHandler := authhttp.New(log, config, authService)
+	profileHandler := profilehttp.New(log, profileService)
 
 	api.HandleFunc("/login", authHandler.Login).Methods("POST")
 	api.HandleFunc("/signup", authHandler.Signup).Methods("POST")
 
 	authApi := api.NewRoute().Subrouter()
 	authApi.Use(authmdw.Authorize(log, config, authUserProviderService))
+
+	authApi.HandleFunc("/profile", profileHandler.GetProfile).Methods("GET")
 
 	server.Handler = router
 
