@@ -26,7 +26,7 @@ func New(log *slog.Logger, config *config.Config) *App {
 
 	authService := auth.New(log, config, pgStorage, pgStorage)
 	userService := user.New(log, config, pgStorage)
-	profileService := profile.New(log, config, pgStorage)
+	profileService := profile.New(log, config, pgStorage, pgStorage)
 
 	httpApp := httpapp.New(log, config, authService, userService, profileService)
 

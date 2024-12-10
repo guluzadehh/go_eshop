@@ -56,6 +56,7 @@ func New(
 	authApi.Use(authmdw.Authorize(log, config, authUserProviderService))
 
 	authApi.HandleFunc("/profile", profileHandler.GetProfile).Methods("GET")
+	authApi.HandleFunc("/profile", profileHandler.DeleteProfile).Methods("DELETE")
 
 	server.Handler = router
 
