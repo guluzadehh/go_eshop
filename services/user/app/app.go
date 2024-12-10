@@ -7,6 +7,7 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/config"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/sl"
 	"github.com/guluzadehh/go_eshop/services/user/internal/service/auth"
+	"github.com/guluzadehh/go_eshop/services/user/internal/service/profile"
 	"github.com/guluzadehh/go_eshop/services/user/internal/service/user"
 	"github.com/guluzadehh/go_eshop/services/user/internal/storage/postgresql"
 )
@@ -25,8 +26,9 @@ func New(log *slog.Logger, config *config.Config) *App {
 
 	authService := auth.New(log, config, pgStorage, pgStorage)
 	userService := user.New(log, config, pgStorage)
+	profileService := profile.New(log, config, pgStorage)
 
-	httpApp := httpapp.New(log, config, authService, userService)
+	httpApp := httpapp.New(log, config, authService, userService, profileService)
 
 	return &App{
 		log:       log,
