@@ -117,3 +117,39 @@ func (s *Storage) UserById(ctx context.Context, id int) (*models.User, error) {
 
 	return &user, nil
 }
+
+func (s *Storage) ProfileById(ctx context.Context, userId int64) (*models.Profile, error) {
+	const op = "storage.postgresql.ProfileById"
+
+	var profile models.Profile
+
+	const query = `
+		SELECT 
+			users.id, users.email, 
+			users.password, 
+			users.created_at, users.updated_at, 
+			users.is_active,
+			profiles.first_name,
+			profiles.last_name,
+			profiles.phone_number,
+			profiles.profile_pic
+		FROM users
+		LEFT JOIN profiles ON profiles.id = users.id
+		WHERE users.id = $1;
+	`
+
+	if err := s.db.QueryRowContext(ctx, query, userId).Scan(
+		&profile.Id, &profile.Email, &profile.Password, &profile.CreatedAt,
+		&profile.UpdatedAt, &profile.IsActive, &profile.FirstName, &profile.LastName,
+		&profile.Phone, &profile.Picture,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("%s: %w", op, storage.ProfileNotFound)
+		}
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return &profile, nil
+}
+
