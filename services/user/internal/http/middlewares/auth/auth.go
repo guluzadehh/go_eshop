@@ -2,6 +2,7 @@ package authmdw
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/jwt"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/render"
 	"github.com/guluzadehh/go_eshop/services/user/internal/lib/sl"
+	"github.com/guluzadehh/go_eshop/services/user/internal/service"
 )
 
 type contextKey string
@@ -74,6 +76,11 @@ func Authorize(log *slog.Logger, config *config.Config, userProviderService User
 
 			user, err := userProviderService.GetUserByEmail(r.Context(), email)
 			if err != nil {
+				if errors.Is(err, service.ErrUserNotFound) {
+					render.JSON(w, http.StatusUnauthorized, authFailResponse())
+					return
+				}
+
 				log.Error("failed to get user by user_id from storage", sl.Err(err))
 				render.JSON(w, http.StatusInternalServerError, api.UnexpectedError())
 				return
