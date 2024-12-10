@@ -153,3 +153,51 @@ func (s *Storage) ProfileById(ctx context.Context, userId int64) (*models.Profil
 	return &profile, nil
 }
 
+func (s *Storage) DeleteProfile(ctx context.Context, userId int64) error {
+	const op = "storage.postgresql.DeleteProfile"
+
+	const queryUserDelete = `DELETE FROM users WHERE users.id = $1;`
+	const queryProfileDelete = `DELETE FROM profiles WHERE profiles.user_id = $1;`
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := s.db.PrepareContext(ctx, queryProfileDelete)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	_, err = stmt.ExecContext(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	stmt, err = s.db.PrepareContext(ctx, queryUserDelete)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	res, err := stmt.ExecContext(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	affects, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if affects == 0 {
+		return fmt.Errorf("%s: %w", op, storage.UserNotFound)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
