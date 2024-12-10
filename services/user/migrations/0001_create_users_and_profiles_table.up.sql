@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS profiles
 (
-    user_id INT NOT NULL,
+    user_id INT NOT NULL PRIMARY KEY,
     first_name VARCHAR(125) NOT NULL,
     last_name VARCHAR(125) NOT NULL,
     phone_number VARCHAR(20),
