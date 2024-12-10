@@ -89,7 +89,12 @@ func (s *AuthService) Signup(ctx context.Context, email string, password string)
 
 	log := s.log.With(slog.String("op", op))
 
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	var cost int = 14
+	if s.config.Env == "local" {
+		cost = 4
+	}
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	if err != nil {
 		log.Error("failed to hash password", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
