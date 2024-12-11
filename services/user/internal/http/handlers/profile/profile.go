@@ -10,6 +10,7 @@ import (
 
 type ProfileService interface {
 	GetProfile(ctx context.Context, id int64) (*models.Profile, error)
+	MakeProfile(ctx context.Context, id int64, firstName, lastName, phone string) (*models.Profile, error)
 	DeleteProfile(ctx context.Context, id int64) error
 	SetLog(log *slog.Logger)
 }

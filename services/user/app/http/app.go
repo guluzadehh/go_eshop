@@ -57,6 +57,7 @@ func New(
 
 	authApi.HandleFunc("/profile", profileHandler.GetProfile).Methods("GET")
 	authApi.HandleFunc("/profile", profileHandler.DeleteProfile).Methods("DELETE")
+	authApi.HandleFunc("/profile", profileHandler.MakeProfile).Methods("PUT")
 
 	server.Handler = router
 
