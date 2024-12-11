@@ -129,12 +129,12 @@ func (s *Storage) ProfileById(ctx context.Context, userId int64) (*models.Profil
 			users.password, 
 			users.created_at, users.updated_at, 
 			users.is_active,
-			profiles.first_name,
-			profiles.last_name,
-			profiles.phone_number,
-			profiles.profile_pic
+			COALESCE(profiles.first_name, ''),
+			COALESCE(profiles.last_name, ''),
+			COALESCE(profiles.phone_number, ''),
+			COALESCE(profiles.profile_pic, '')
 		FROM users
-		LEFT JOIN profiles ON profiles.id = users.id
+		LEFT JOIN profiles ON profiles.user_id = users.id
 		WHERE users.id = $1;
 	`
 
