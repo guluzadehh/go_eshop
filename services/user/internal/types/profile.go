@@ -16,7 +16,7 @@ func NewProfile(p *models.Profile) *ProfileView {
 	}
 
 	return &ProfileView{
-		UserView:  NewUser(p.User),
+		UserView:  NewUser(&p.User),
 		FirstName: p.FirstName,
 		LastName:  p.LastName,
 		Phone:     p.Phone,

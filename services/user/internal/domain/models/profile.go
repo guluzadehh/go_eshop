@@ -1,7 +1,7 @@
 package models
 
 type Profile struct {
-	*User
+	User
 	FirstName string
 	LastName  string
 	Phone     string
