@@ -15,6 +15,7 @@ import (
 
 type ProfileProvider interface {
 	ProfileById(ctx context.Context, id int64) (*models.Profile, error)
+	SaveProfile(ctx context.Context, id int64, firstName, lastName, phone string) (*models.Profile, error)
 }
 
 type ProfileDeleter interface {
@@ -77,4 +78,31 @@ func (s *ProfileService) DeleteProfile(ctx context.Context, userId int64) error 
 	log.Info("user has been deleted", slog.Int64("user_id", userId))
 
 	return nil
+}
+
+func (s *ProfileService) MakeProfile(
+	ctx context.Context,
+	userId int64,
+	firstName string,
+	lastName string,
+	phone string,
+) (*models.Profile, error) {
+	const op = "services.profile.MakeProfile"
+
+	log := s.log.With(slog.String("op", op))
+
+	profile, err := s.profileProvider.SaveProfile(ctx, userId, firstName, lastName, phone)
+	if err != nil {
+		if errors.Is(err, storage.UserNotFound) {
+			log.Info("user for profile doesn't exist")
+			return nil, service.ErrUserNotFound
+		}
+
+		log.Error("failed to create profile for user", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("profile has been created")
+
+	return profile, nil
 }

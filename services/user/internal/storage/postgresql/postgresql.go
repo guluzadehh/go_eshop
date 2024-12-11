@@ -201,3 +201,39 @@ func (s *Storage) DeleteProfile(ctx context.Context, userId int64) error {
 	return nil
 }
 
+func (s *Storage) SaveProfile(
+	ctx context.Context,
+	userId int64,
+	firstName string,
+	lastName string,
+	phone string,
+) (*models.Profile, error) {
+	const op = "storage.postgresql.SaveProfile"
+
+	const query = `
+		INSERT INTO profiles(user_id, first_name, last_name, phone_number)
+		VALUES ($1, $2, $3, $4);
+	`
+
+	stmt, err := s.db.PrepareContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if _, err := stmt.ExecContext(ctx, userId, firstName, lastName, phone); err != nil {
+		if postgresErr, ok := err.(*pq.Error); ok {
+			if postgresErr.Code == "23503" { // Foreign key violation error code
+				return nil, fmt.Errorf("%s: %w", op, storage.UserNotFound)
+			}
+		}
+
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	profile, err := s.ProfileById(ctx, userId)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return profile, nil
+}
