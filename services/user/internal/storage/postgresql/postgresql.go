@@ -9,7 +9,6 @@ import (
 	"github.com/guluzadehh/go_eshop/services/user/internal/domain/models"
 	"github.com/guluzadehh/go_eshop/services/user/internal/storage"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 )
 
 type Storage struct {
